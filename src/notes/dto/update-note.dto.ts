@@ -1,4 +1,14 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateNoteDto } from './create-note.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional } from 'class-validator';
 
-export class UpdateNoteDto extends PartialType(CreateNoteDto) {}
+export class UpdateNoteDto{
+    @ApiProperty({ description: 'Title of the note', example: 'How to use Docker' })
+    @IsString()
+    @IsOptional()
+    title?: string;
+
+    @ApiProperty({ description: 'Body content of the note', example: 'Study Docker for the exam' })
+    @IsString()
+    @IsOptional()
+    body?: string;
+}

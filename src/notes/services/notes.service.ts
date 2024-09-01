@@ -1,26 +1,52 @@
-import { Injectable } from '@nestjs/common';
-import { CreateNoteDto } from './dto/create-note.dto';
-import { UpdateNoteDto } from './dto/update-note.dto';
+/* eslint-disable prettier/prettier */
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Note } from '../entities/note.entity';
+import { CreateNoteDto, UpdateNoteDto } from '../dto';
 
 @Injectable()
 export class NotesService {
-  create(createNoteDto: CreateNoteDto) {
-    return 'This action adds a new note';
+  constructor(@InjectModel(Note.name) private noteModel: Model<Note>) {}
+
+  async create(createNote :CreateNoteDto): Promise<Note> {
+    const newNote = new this.noteModel(createNote);
+    return newNote.save();
   }
 
-  findAll() {
-    return `This action returns all notes`;
+  async findAll(): Promise<Note[]> {
+    return this.noteModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} note`;
+  async findOne(id: string): Promise<Note> {
+    const note = await this.noteModel.findById(id).exec();
+    if (!note) {
+      throw new NotFoundException(`Note with ID ${id} not found`);
+    }
+    return note;
   }
 
-  update(id: number, updateNoteDto: UpdateNoteDto) {
-    return `This action updates a #${id} note`;
+  async update(id: string, updateNote: UpdateNoteDto): Promise<Note> {
+    if (!updateNote.title && !updateNote.body) {
+      throw new BadRequestException('At least one field (title or content) must be updated');
+    }
+
+    const updatedNote = await this.noteModel.findByIdAndUpdate(
+      id, UpdateNoteDto,
+      { new: true, runValidators: true },
+      ).exec();
+
+    if (!updatedNote) {
+      throw new NotFoundException(`Note with ID ${id} not found`);
+    }
+
+    return updatedNote;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} note`;
+  async delete(id: string): Promise<void> {
+    const result = await this.noteModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Note with ID ${id} not found`);
+    }
   }
 }
