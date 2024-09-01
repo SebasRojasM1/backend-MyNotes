@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
-import { NotesModule } from './notes/notes.module';
-import dbConfig from 'config/persistence/db-config';
+import { NotesModule } from './modules/notes/notes.module';
+import dbConfig from './libs/config/persistence/db-config';
 import { ConfigModule } from '@nestjs/config';
-import { NotesController } from './notes/controllers/notes.controller';
-import { NotesService } from './notes/services/notes.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Notes, noteSchema } from './notes/entities/note.entity';
+import { persistenceModule } from './libs/config/persistence/persistence.module';
 
 @Module({
   imports: [
@@ -14,10 +11,11 @@ import { Notes, noteSchema } from './notes/entities/note.entity';
       load: [dbConfig],
       envFilePath: '.env',
     }),
-    MongooseModule.forFeature([{ name: Notes.name, schema: noteSchema }]),
+    persistenceModule,
     NotesModule
   ],
-  controllers: [NotesController],
-  providers: [NotesService],
+  controllers: [],
+  providers: [],
 })
+
 export class AppModule {}

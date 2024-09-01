@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { NotesService } from './services/notes.service';
-import { NotesController } from './controllers/notes.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Note, noteSchema } from './entities/note.entity';
+import { NotesController } from './controllers/notes.controller';
+import { NotesService } from './services/notes.service';
 
 @Module({
   imports: [
@@ -11,6 +11,6 @@ import { Note, noteSchema } from './entities/note.entity';
   ],
   controllers: [NotesController],
   providers: [NotesService],
+  exports:[NotesService]
 })
-
-export class NotesModule { }
+export class NotesModule {}

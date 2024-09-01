@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model } from 'mongoose';
 import { Note } from '../entities/note.entity';
 import { CreateNoteDto, UpdateNoteDto } from '../dto';
 
@@ -27,14 +27,14 @@ export class NotesService {
   }
 
   async update(id: string, updateNote: UpdateNoteDto): Promise<Note> {
-    if (!updateNote.title && !updateNote.body) {
-      throw new BadRequestException('At least one field (title or content) must be updated');
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid ID format');
     }
 
-    const updatedNote = await this.noteModel.findByIdAndUpdate(
-      id, UpdateNoteDto,
-      { new: true, runValidators: true },
-      ).exec();
+    const updatedNote = await this.noteModel.findByIdAndUpdate(id, updateNote, {
+      new: true,
+      runValidators: true, // Ejecutar validadores de Mongoose
+    });
 
     if (!updatedNote) {
       throw new NotFoundException(`Note with ID ${id} not found`);
@@ -45,6 +45,7 @@ export class NotesService {
 
   async delete(id: string): Promise<void> {
     const result = await this.noteModel.findByIdAndDelete(id).exec();
+
     if (!result) {
       throw new NotFoundException(`Note with ID ${id} not found`);
     }
